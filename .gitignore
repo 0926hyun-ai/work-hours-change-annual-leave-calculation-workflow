@@ -1,0 +1,22 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Original/private business materials and exported data
+materials/
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+
+# Local runtime and OS artifacts
+node_modules/
+__pycache__/
+*.py[cod]
+*.log
+.DS_Store
+Thumbs.db
+
+# Superseded intermediate dump; latest verification is in RESULTS.md
+verification/calculation-results.json

@@ -1,0 +1,22 @@
+{
+  "employeeId": "DEMO-001",
+  "hireDate": "2025-01-01",
+  "endDate": "2026-01-02",
+  "histories": [
+    {
+      "startDate": "2025-01-01",
+      "endDate": "2025-06-30",
+      "weeklyHours": 40
+    },
+    {
+      "startDate": "2025-07-01",
+      "endDate": "2026-01-02",
+      "weeklyHours": 20
+    }
+  ],
+  "expected": {
+    "monthlyHours": 68,
+    "annualHours": 89.875,
+    "totalHours": 157.875
+  }
+}
