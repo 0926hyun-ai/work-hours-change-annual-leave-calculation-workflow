@@ -47,6 +47,17 @@ test('calculates the fictional browser sample and matches its three expected tot
   assert.equal(result.matches, true);
 });
 
+test('calculates monthly, annual, and overall totals without user-provided expected answers', () => {
+  const { expected: _expected, ...inputWithoutExpected } = demoSample;
+  const result = calculate(inputWithoutExpected);
+  assert.equal(result.errors, undefined);
+  assert.equal(result.monthlyHours, 68);
+  almost(result.annualHours, 89.875);
+  assert.equal(result.totalHours, 157.875);
+  assert.equal(result.matches, undefined);
+  assert.equal(result.differences, undefined);
+});
+
 test('compares both rounded subtotals and their sum against expected values', () => {
   const changedHistory = { ...demoSample, histories: [demoSample.histories[0], { ...demoSample.histories[1], weeklyHours: 21 }], expected: { monthlyHours: 69, annualHours: 91.375, totalHours: 160.375 } };
   const result = calculate(changedHistory);

@@ -84,9 +84,9 @@ export function validateInput(input) {
       }
     }
   }
-  if (!input.expected || typeof input.expected !== 'object' || Array.isArray(input.expected)) {
-    errors.push('확정 정답 3개 값을 입력하세요.');
-  } else {
+  if (input.expected !== undefined && (!input.expected || typeof input.expected !== 'object' || Array.isArray(input.expected))) {
+    errors.push('확정 정답이 올바르지 않습니다.');
+  } else if (input.expected !== undefined) {
     for (const key of ['monthlyHours', 'annualHours', 'totalHours']) {
       const value = input.expected[key];
       if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) errors.push(`확정 정답 ${key}: 0 이상의 유한한 숫자를 입력하세요.`);
@@ -146,14 +146,14 @@ export function calculate(input) {
   const monthlyHours = ceilingToEighthHour(rawMonthlyHours);
   const annualHours = ceilingToEighthHour(rawAnnualHours);
   const totalHours = monthlyHours + annualHours;
-  const differences = {
+  const differences = input.expected ? {
     monthlyHours: monthlyHours - input.expected.monthlyHours,
     annualHours: annualHours - input.expected.annualHours,
     totalHours: totalHours - input.expected.totalHours,
-  };
-  if (![rawMonthlyHours, rawAnnualHours, unroundedTotalHours, monthlyHours, annualHours, totalHours, ...Object.values(differences)].every(Number.isFinite)) {
+  } : undefined;
+  if (![rawMonthlyHours, rawAnnualHours, unroundedTotalHours, monthlyHours, annualHours, totalHours, ...(differences ? Object.values(differences) : [])].every(Number.isFinite)) {
     return { errors: ['합계 또는 정답 차이가 유한한 숫자가 아닙니다. 입력값 규모를 확인하세요.'] };
   }
-  const matches = Object.values(differences).every(value => Math.abs(value) <= COMPARISON_TOLERANCE);
-  return { employeeId: input.employeeId.trim(), monthly, annual, rawMonthlyHours, rawAnnualHours, monthlyHours, annualHours, unroundedTotalHours, totalHours, differences, matches, tolerance: COMPARISON_TOLERANCE };
+  const matches = differences ? Object.values(differences).every(value => Math.abs(value) <= COMPARISON_TOLERANCE) : undefined;
+  return { employeeId: input.employeeId.trim(), monthly, annual, rawMonthlyHours, rawAnnualHours, monthlyHours, annualHours, unroundedTotalHours, totalHours, ...(differences ? { differences, matches, tolerance: COMPARISON_TOLERANCE } : {}) };
 }
