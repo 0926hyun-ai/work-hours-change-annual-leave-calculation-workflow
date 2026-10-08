@@ -63,7 +63,7 @@ function resultColumnMarkup(input) {
 function updateResult() {
   inputData = readForm();
   notice = '';
-  root.querySelector('.right-column').innerHTML = `${resultColumnMarkup(inputData)}<section class="card reference"><div class="section-kicker">자동 계산 기준</div><h2>결과 표시</h2><p>입사일·퇴사일과 근무 이력을 모두 입력하면 월별·연별 합계가 자동으로 갱신됩니다.</p><p class="muted">구간별 계산은 정밀값을 유지합니다. 필수 입력 누락·날짜 오류·이력 누락 또는 중첩은 계산을 중단하고 안내합니다.</p></section>`;
+  root.querySelector('.right-column').innerHTML = `${resultColumnMarkup(inputData)}<section class="card reference"><div class="section-kicker">자동 계산 기준</div><h2>결과 표시</h2><p>입사일·퇴사일과 근무 이력을 모두 입력하면 월별·연별 합계가 자동으로 갱신됩니다. 입력 목록 아래 자동 계산을 누르면 현재 입력을 다시 계산하고 결과로 이동합니다.</p><p class="muted">구간별 계산은 정밀값을 유지합니다. 필수 입력 누락·날짜 오류·이력 누락 또는 중첩은 계산을 중단하고 안내합니다.</p></section>`;
 }
 
 function render() {
@@ -72,12 +72,16 @@ function render() {
     <div class="intro"><span class="tag">자동 계산</span><h1>근무 이력을 입력하면 합계를 계산합니다</h1><p>근무기간별 주간 시간을 날짜로 가중평균해 월별·연별 비례 연차 시간을 계산합니다.</p></div>
     <div class="layout"><div class="left-column"><section class="card"><div class="section-kicker">입력</div><h2>직원 정보와 근무 이력</h2><div class="actions"><button id="load-sample" class="secondary" type="button">가상 정상 샘플 불러오기</button><span class="muted">샘플을 불러온 뒤 값을 직접 수정할 수 있습니다.</span></div><form autocomplete="off">
       <div class="form-grid"><label>직원 식별자<input name="employeeId" value="${escapeHtml(data.employeeId)}" required></label><label>입사일<input name="hireDate" type="date" value="${escapeHtml(data.hireDate)}" required></label><label>퇴사일<input name="endDate" type="date" value="${escapeHtml(data.endDate)}" required></label></div>
-      <div class="history-heading"><h3>근무 이력 <span>${data.histories.length}/10</span></h3><button id="add-row" class="ghost" type="button" ${data.histories.length >= 10 ? 'disabled' : ''}>＋ 이력 추가</button></div><div class="history-list">${historyRows(data.histories)}</div>
+      <div class="history-heading"><h3>근무 이력 <span>${data.histories.length}/10</span></h3><button id="add-row" class="ghost" type="button" ${data.histories.length >= 10 ? 'disabled' : ''}>＋ 이력 추가</button></div><div class="history-list">${historyRows(data.histories)}</div><button id="calculate-now" class="primary calculate-button" type="button">자동 계산</button>
     </form></section>
     <section class="card rationale"><div class="section-kicker">계산 근거</div><h2>원본 수식 구조 재현</h2><p>월별 11구간은 입사일부터 매월 EDATE(시작일, 1)로 이동하고, 연별 5구간은 EDATE(시작일, 12)로 이동합니다. 각 종료일은 다음 시작일 하루 전입니다.</p><div class="formula">기준일수 × 8 × (겹침일수 가중평균 주간시간 ÷ 40)</div><p class="muted">연별 기준일수: 15, 15, 16, 16, 17일 · 매월 개근 전제</p><p class="muted">개별 구간은 정밀값을 유지합니다. 월별·연별 소계에 각각 0.125시간 단위 CEILING을 적용하고, 총합은 두 올림 소계의 합으로 계산합니다.</p><p class="muted">양끝 날짜 포함 · 날짜는 UTC 기준 · 월말 이동은 EDATE처럼 대상 월 말일로 보정 · 퇴사일 ≥ 구간 종료일 + 1일일 때 발생</p><p class="muted">이력 누락·중첩·범위 밖 날짜가 있으면 계산을 중단합니다.</p></section></div>
-    <div class="right-column">${resultColumnMarkup(data)}<section class="card reference"><div class="section-kicker">자동 계산 기준</div><h2>결과 표시</h2><p>입사일·퇴사일과 근무 이력을 모두 입력하면 월별·연별 합계가 자동으로 갱신됩니다.</p><p class="muted">구간별 계산은 정밀값을 유지합니다. 필수 입력 누락·날짜 오류·이력 누락 또는 중첩은 계산을 중단하고 안내합니다.</p></section></div></div>
+    <div class="right-column">${resultColumnMarkup(data)}<section class="card reference"><div class="section-kicker">자동 계산 기준</div><h2>결과 표시</h2><p>입사일·퇴사일과 근무 이력을 모두 입력하면 월별·연별 합계가 자동으로 갱신됩니다. 입력 목록 아래 자동 계산을 누르면 현재 입력을 다시 계산하고 결과로 이동합니다.</p><p class="muted">구간별 계산은 정밀값을 유지합니다. 필수 입력 누락·날짜 오류·이력 누락 또는 중첩은 계산을 중단하고 안내합니다.</p></section></div></div>
     <footer>이번 범위: 직원 1명 근무 이력 자동 계산</footer></main>`;
   root.querySelector('#load-sample').addEventListener('click', loadSample);
+  root.querySelector('#calculate-now').addEventListener('click', () => {
+    updateResult();
+    root.querySelector('.result-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
   root.querySelector('#add-row').addEventListener('click', () => {
     inputData = readForm();
     if (inputData.histories.length < 10) inputData.histories.push({ startDate: '', endDate: '', weeklyHours: '' });
